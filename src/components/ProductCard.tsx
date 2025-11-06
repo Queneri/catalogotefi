@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Check, X } from "lucide-react";
+import { Pencil, Check, X, Upload, Plus, Trash2 } from "lucide-react";
 
 export interface Product {
   id: number;
@@ -17,32 +17,89 @@ export interface Product {
 interface ProductCardProps {
   product: Product;
   onPriceUpdate: (id: number, newPrice: number) => void;
+  onSizesUpdate: (id: number, newSizes: string[]) => void;
+  onImageUpdate: (id: number, newImage: string) => void;
+  onNameUpdate: (id: number, newName: string) => void;
 }
 
-export const ProductCard = ({ product, onPriceUpdate }: ProductCardProps) => {
+export const ProductCard = ({ 
+  product, 
+  onPriceUpdate, 
+  onSizesUpdate, 
+  onImageUpdate,
+  onNameUpdate 
+}: ProductCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrice, setEditedPrice] = useState(product.price.toString());
+  const [editedSizes, setEditedSizes] = useState<string[]>(product.sizes);
+  const [editedName, setEditedName] = useState(product.name);
+  const [newSize, setNewSize] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSave = () => {
     const newPrice = parseFloat(editedPrice);
     if (!isNaN(newPrice) && newPrice > 0) {
       onPriceUpdate(product.id, newPrice);
+      onSizesUpdate(product.id, editedSizes);
+      onNameUpdate(product.id, editedName);
       setIsEditing(false);
     }
   };
 
   const handleCancel = () => {
     setEditedPrice(product.price.toString());
+    setEditedSizes(product.sizes);
+    setEditedName(product.name);
     setIsEditing(false);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onImageUpdate(product.id, reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddSize = () => {
+    if (newSize.trim() && !editedSizes.includes(newSize.trim().toUpperCase())) {
+      setEditedSizes([...editedSizes, newSize.trim().toUpperCase()]);
+      setNewSize("");
+    }
+  };
+
+  const handleRemoveSize = (sizeToRemove: string) => {
+    setEditedSizes(editedSizes.filter(size => size !== sizeToRemove));
   };
 
   return (
     <Card className="group overflow-hidden border-border bg-card transition-all hover:shadow-lg">
-      <div className="aspect-[3/4] overflow-hidden bg-muted">
+      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         <img
           src={product.image}
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        {!isEditing && (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+          >
+            <Upload className="mr-1 h-3 w-3" />
+            Cambiar
+          </Button>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="hidden"
         />
       </div>
       <div className="space-y-3 p-4">
@@ -50,24 +107,71 @@ export const ProductCard = ({ product, onPriceUpdate }: ProductCardProps) => {
           <p className="text-xs font-light uppercase tracking-wider text-muted-foreground">
             {product.category}
           </p>
-          <h3 className="mt-1 font-medium text-foreground">{product.name}</h3>
+          {isEditing ? (
+            <Input
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              className="mt-1 h-8 text-sm font-medium"
+            />
+          ) : (
+            <h3 className="mt-1 font-medium text-foreground">{product.name}</h3>
+          )}
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
-          {product.sizes.map((size) => (
-            <Badge
-              key={size}
-              variant="outline"
-              className="border-border bg-background text-xs font-light"
-            >
-              {size}
-            </Badge>
-          ))}
-        </div>
+        {isEditing ? (
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-1.5">
+              {editedSizes.map((size) => (
+                <Badge
+                  key={size}
+                  variant="outline"
+                  className="group/badge border-border bg-background text-xs font-light"
+                >
+                  {size}
+                  <button
+                    onClick={() => handleRemoveSize(size)}
+                    className="ml-1 opacity-0 transition-opacity group-hover/badge:opacity-100"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            <div className="flex gap-1">
+              <Input
+                placeholder="Nuevo talle"
+                value={newSize}
+                onChange={(e) => setNewSize(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleAddSize()}
+                className="h-7 text-xs"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleAddSize}
+                className="h-7 w-7 p-0"
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {product.sizes.map((size) => (
+              <Badge
+                key={size}
+                variant="outline"
+                className="border-border bg-background text-xs font-light"
+              >
+                {size}
+              </Badge>
+            ))}
+          </div>
+        )}
 
         <div className="flex items-center justify-between border-t border-border pt-3">
           {isEditing ? (
-            <div className="flex items-center gap-2">
+            <div className="flex w-full items-center gap-2">
               <Input
                 type="number"
                 value={editedPrice}

@@ -17,6 +17,31 @@ const Index = () => {
     toast.success("Precio actualizado correctamente");
   };
 
+  const handleSizesUpdate = (id: number, newSizes: string[]) => {
+    setProducts((prev) =>
+      prev.map((product) =>
+        product.id === id ? { ...product, sizes: newSizes } : product
+      )
+    );
+  };
+
+  const handleImageUpdate = (id: number, newImage: string) => {
+    setProducts((prev) =>
+      prev.map((product) =>
+        product.id === id ? { ...product, image: newImage } : product
+      )
+    );
+    toast.success("Imagen actualizada correctamente");
+  };
+
+  const handleNameUpdate = (id: number, newName: string) => {
+    setProducts((prev) =>
+      prev.map((product) =>
+        product.id === id ? { ...product, name: newName } : product
+      )
+    );
+  };
+
   const handleExportPDF = async () => {
     try {
       toast.info("Generando PDF...");
@@ -39,6 +64,9 @@ const Index = () => {
               key={product.id}
               product={product}
               onPriceUpdate={handlePriceUpdate}
+              onSizesUpdate={handleSizesUpdate}
+              onImageUpdate={handleImageUpdate}
+              onNameUpdate={handleNameUpdate}
             />
           ))}
         </div>
