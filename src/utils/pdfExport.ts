@@ -41,8 +41,8 @@ export const exportToPDF = async (products: Product[]) => {
     }
 
     try {
-      // Add product image
-      const img = await loadImage(product.image);
+      // Add first product image
+      const img = await loadImage(product.images[0]);
       pdf.addImage(img, "JPEG", margin, yPosition, imageWidth, imageHeight);
     } catch (error) {
       console.error("Error loading image:", error);

@@ -4,12 +4,19 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Check, X, Upload, Plus, Trash2 } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 export interface Product {
   id: number;
   name: string;
   category: string;
-  image: string;
+  images: string[];
   sizes: string[];
   price: number;
 }
@@ -18,7 +25,7 @@ interface ProductCardProps {
   product: Product;
   onPriceUpdate: (id: number, newPrice: number) => void;
   onSizesUpdate: (id: number, newSizes: string[]) => void;
-  onImageUpdate: (id: number, newImage: string) => void;
+  onImagesUpdate: (id: number, newImages: string[]) => void;
   onNameUpdate: (id: number, newName: string) => void;
 }
 
@@ -26,7 +33,7 @@ export const ProductCard = ({
   product, 
   onPriceUpdate, 
   onSizesUpdate, 
-  onImageUpdate,
+  onImagesUpdate,
   onNameUpdate 
 }: ProductCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -54,13 +61,28 @@ export const ProductCard = ({
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onImageUpdate(product.id, reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
+      const newImages: string[] = [];
+      
+      fileArray.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newImages.push(reader.result as string);
+          if (newImages.length === fileArray.length) {
+            onImagesUpdate(product.id, [...product.images, ...newImages]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    const updatedImages = product.images.filter((_, index) => index !== indexToRemove);
+    if (updatedImages.length > 0) {
+      onImagesUpdate(product.id, updatedImages);
     }
   };
 
@@ -78,26 +100,49 @@ export const ProductCard = ({
   return (
     <Card className="group overflow-hidden border-border bg-card transition-all hover:shadow-lg">
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        {!isEditing && (
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
-          >
-            <Upload className="mr-1 h-3 w-3" />
-            Cambiar
-          </Button>
-        )}
+        <Carousel className="h-full w-full">
+          <CarouselContent>
+            {product.images.map((image, index) => (
+              <CarouselItem key={index} className="relative">
+                <img
+                  src={image}
+                  alt={`${product.name} - ${index + 1}`}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                {isEditing && product.images.length > 1 && (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleRemoveImage(index)}
+                    className="absolute right-2 top-2"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                )}
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          {product.images.length > 1 && (
+            <>
+              <CarouselPrevious className="left-2" />
+              <CarouselNext className="right-2" />
+            </>
+          )}
+        </Carousel>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => fileInputRef.current?.click()}
+          className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+        >
+          <Upload className="mr-1 h-3 w-3" />
+          {product.images.length > 0 ? "Agregar" : "Subir"}
+        </Button>
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
+          multiple
           onChange={handleImageChange}
           className="hidden"
         />

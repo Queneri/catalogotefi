@@ -5,7 +5,7 @@ import { initialProducts } from "@/data/products";
 import { exportToPDF } from "@/utils/pdfExport";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +29,7 @@ const Index = () => {
   const [newProduct, setNewProduct] = useState({
     name: "",
     category: "T-Shirts",
-    image: "",
+    images: [] as string[],
     sizes: "",
     price: "",
   });
@@ -51,13 +51,13 @@ const Index = () => {
     );
   };
 
-  const handleImageUpdate = (id: number, newImage: string) => {
+  const handleImagesUpdate = (id: number, newImages: string[]) => {
     setProducts((prev) =>
       prev.map((product) =>
-        product.id === id ? { ...product, image: newImage } : product
+        product.id === id ? { ...product, images: newImages } : product
       )
     );
-    toast.success("Imagen actualizada correctamente");
+    toast.success("Imágenes actualizadas correctamente");
   };
 
   const handleNameUpdate = (id: number, newName: string) => {
@@ -80,19 +80,34 @@ const Index = () => {
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewProduct({ ...newProduct, image: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
+      const newImages: string[] = [];
+      
+      fileArray.forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newImages.push(reader.result as string);
+          if (newImages.length === fileArray.length) {
+            setNewProduct({ ...newProduct, images: [...newProduct.images, ...newImages] });
+          }
+        };
+        reader.readAsDataURL(file);
+      });
     }
   };
 
+  const handleRemoveNewProductImage = (indexToRemove: number) => {
+    setNewProduct({
+      ...newProduct,
+      images: newProduct.images.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
   const handleAddProduct = () => {
-    if (!newProduct.name || !newProduct.price || !newProduct.sizes || !newProduct.image) {
-      toast.error("Por favor completa todos los campos");
+    if (!newProduct.name || !newProduct.price || !newProduct.sizes || newProduct.images.length === 0) {
+      toast.error("Por favor completa todos los campos y agrega al menos una imagen");
       return;
     }
 
@@ -105,7 +120,7 @@ const Index = () => {
       id: Math.max(...products.map((p) => p.id)) + 1,
       name: newProduct.name,
       category: newProduct.category,
-      image: newProduct.image,
+      images: newProduct.images,
       sizes: sizesArray,
       price: parseFloat(newProduct.price),
     };
@@ -114,7 +129,7 @@ const Index = () => {
     setNewProduct({
       name: "",
       category: "T-Shirts",
-      image: "",
+      images: [],
       sizes: "",
       price: "",
     });
@@ -193,19 +208,34 @@ const Index = () => {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="image">Imagen del producto</Label>
+                  <Label htmlFor="image">Imágenes del producto</Label>
                   <Input
                     id="image"
                     type="file"
                     accept="image/*"
+                    multiple
                     onChange={handleImageUpload}
                   />
-                  {newProduct.image && (
-                    <img
-                      src={newProduct.image}
-                      alt="Preview"
-                      className="mt-2 h-32 w-32 rounded object-cover"
-                    />
+                  {newProduct.images.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {newProduct.images.map((img, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={img}
+                            alt={`Preview ${index + 1}`}
+                            className="h-24 w-24 rounded object-cover"
+                          />
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleRemoveNewProductImage(index)}
+                            className="absolute -right-2 -top-2 h-6 w-6 rounded-full p-0"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
                 <Button onClick={handleAddProduct} className="w-full">
@@ -223,7 +253,7 @@ const Index = () => {
               product={product}
               onPriceUpdate={handlePriceUpdate}
               onSizesUpdate={handleSizesUpdate}
-              onImageUpdate={handleImageUpdate}
+              onImagesUpdate={handleImagesUpdate}
               onNameUpdate={handleNameUpdate}
             />
           ))}
