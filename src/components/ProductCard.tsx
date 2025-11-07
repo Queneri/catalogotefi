@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export interface Product {
-  id: number;
+  id: number | string;
   name: string;
   category: string;
   images: string[];
@@ -34,11 +34,11 @@ export interface Product {
 
 interface ProductCardProps {
   product: Product;
-  onPriceUpdate: (id: number, newPrice: number) => void;
-  onSizesUpdate: (id: number, newSizes: string[]) => void;
-  onImagesUpdate: (id: number, newImages: string[]) => void;
-  onNameUpdate: (id: number, newName: string) => void;
-  onDelete: (id: number) => void;
+  onPriceUpdate: (id: number | string, newPrice: number) => void;
+  onSizesUpdate: (id: number | string, newSizes: string[]) => void;
+  onImagesUpdate: (id: number | string, newImages: string[]) => void;
+  onNameUpdate: (id: number | string, newName: string) => void;
+  onDelete: (id: number | string) => void;
 }
 
 export const ProductCard = ({ 

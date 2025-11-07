@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { ProductCard, Product } from "@/components/ProductCard";
 import { CatalogHeader } from "@/components/CatalogHeader";
-import { initialProducts } from "@/data/products";
 import { exportToPDF } from "@/utils/pdfExport";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -24,11 +24,9 @@ import {
 } from "@/components/ui/select";
 
 const Index = () => {
-  const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem("catalog-products");
-    return saved ? JSON.parse(saved) : initialProducts;
-  });
+  const [products, setProducts] = useState<Product[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [newProduct, setNewProduct] = useState({
     name: "",
     category: "T-Shirts",
@@ -37,47 +35,137 @@ const Index = () => {
     price: "",
   });
 
+  // Load products from database
   useEffect(() => {
-    localStorage.setItem("catalog-products", JSON.stringify(products));
-  }, [products]);
+    loadProducts();
+  }, []);
 
-  const handlePriceUpdate = (id: number, newPrice: number) => {
-    setProducts((prev) =>
-      prev.map((product) =>
-        product.id === id ? { ...product, price: newPrice } : product
-      )
-    );
-    toast.success("Precio actualizado correctamente");
+  const loadProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedProducts: Product[] = data.map((item) => ({
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        images: item.images,
+        sizes: item.sizes,
+        price: item.price,
+      }));
+
+      setProducts(formattedProducts);
+    } catch (error) {
+      console.error('Error loading products:', error);
+      toast.error('Error al cargar los productos');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSizesUpdate = (id: number, newSizes: string[]) => {
-    setProducts((prev) =>
-      prev.map((product) =>
-        product.id === id ? { ...product, sizes: newSizes } : product
-      )
-    );
+  const handlePriceUpdate = async (id: number | string, newPrice: number) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ price: newPrice })
+        .eq('id', String(id));
+
+      if (error) throw error;
+
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === id ? { ...product, price: newPrice } : product
+        )
+      );
+      toast.success("Precio actualizado correctamente");
+    } catch (error) {
+      console.error('Error updating price:', error);
+      toast.error('Error al actualizar el precio');
+    }
   };
 
-  const handleImagesUpdate = (id: number, newImages: string[]) => {
-    setProducts((prev) =>
-      prev.map((product) =>
-        product.id === id ? { ...product, images: newImages } : product
-      )
-    );
-    toast.success("Imágenes actualizadas correctamente");
+  const handleSizesUpdate = async (id: number | string, newSizes: string[]) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ sizes: newSizes })
+        .eq('id', String(id));
+
+      if (error) throw error;
+
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === id ? { ...product, sizes: newSizes } : product
+        )
+      );
+      toast.success("Talles actualizados correctamente");
+    } catch (error) {
+      console.error('Error updating sizes:', error);
+      toast.error('Error al actualizar los talles');
+    }
   };
 
-  const handleNameUpdate = (id: number, newName: string) => {
-    setProducts((prev) =>
-      prev.map((product) =>
-        product.id === id ? { ...product, name: newName } : product
-      )
-    );
+  const handleImagesUpdate = async (id: number | string, newImages: string[]) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ images: newImages })
+        .eq('id', String(id));
+
+      if (error) throw error;
+
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === id ? { ...product, images: newImages } : product
+        )
+      );
+      toast.success("Imágenes actualizadas correctamente");
+    } catch (error) {
+      console.error('Error updating images:', error);
+      toast.error('Error al actualizar las imágenes');
+    }
   };
 
-  const handleDeleteProduct = (id: number) => {
-    setProducts((prev) => prev.filter((product) => product.id !== id));
-    toast.success("Producto eliminado correctamente");
+  const handleNameUpdate = async (id: number | string, newName: string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ name: newName })
+        .eq('id', String(id));
+
+      if (error) throw error;
+
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === id ? { ...product, name: newName } : product
+        )
+      );
+      toast.success("Nombre actualizado correctamente");
+    } catch (error) {
+      console.error('Error updating name:', error);
+      toast.error('Error al actualizar el nombre');
+    }
+  };
+
+  const handleDeleteProduct = async (id: number | string) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', String(id));
+
+      if (error) throw error;
+
+      setProducts((prev) => prev.filter((product) => product.id !== id));
+      toast.success("Producto eliminado correctamente");
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast.error('Error al eliminar el producto');
+    }
   };
 
   const handleExportPDF = async () => {
@@ -117,7 +205,7 @@ const Index = () => {
     });
   };
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => {
     if (!newProduct.name || !newProduct.price || !newProduct.sizes || newProduct.images.length === 0) {
       toast.error("Por favor completa todos los campos y agrega al menos una imagen");
       return;
@@ -128,25 +216,44 @@ const Index = () => {
       .map((s) => s.trim().toUpperCase())
       .filter((s) => s);
 
-    const product: Product = {
-      id: Math.max(...products.map((p) => p.id)) + 1,
-      name: newProduct.name,
-      category: newProduct.category,
-      images: newProduct.images,
-      sizes: sizesArray,
-      price: parseFloat(newProduct.price),
-    };
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .insert([{
+          name: newProduct.name,
+          category: newProduct.category,
+          images: newProduct.images,
+          sizes: sizesArray,
+          price: parseFloat(newProduct.price),
+        }])
+        .select()
+        .single();
 
-    setProducts([...products, product]);
-    setNewProduct({
-      name: "",
-      category: "T-Shirts",
-      images: [],
-      sizes: "",
-      price: "",
-    });
-    setIsDialogOpen(false);
-    toast.success("Producto agregado correctamente");
+      if (error) throw error;
+
+      const product: Product = {
+        id: data.id,
+        name: data.name,
+        category: data.category,
+        images: data.images,
+        sizes: data.sizes,
+        price: data.price,
+      };
+
+      setProducts([product, ...products]);
+      setNewProduct({
+        name: "",
+        category: "T-Shirts",
+        images: [],
+        sizes: "",
+        price: "",
+      });
+      setIsDialogOpen(false);
+      toast.success("Producto agregado correctamente");
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast.error('Error al agregar el producto');
+    }
   };
 
   return (
@@ -259,7 +366,16 @@ const Index = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((product) => (
+        {isLoading ? (
+          <div className="col-span-full flex justify-center py-12">
+            <p className="text-muted-foreground">Cargando productos...</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="col-span-full flex justify-center py-12">
+            <p className="text-muted-foreground">No hay productos. Agrega tu primer producto!</p>
+          </div>
+        ) : (
+          products.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
@@ -269,7 +385,8 @@ const Index = () => {
               onNameUpdate={handleNameUpdate}
               onDelete={handleDeleteProduct}
             />
-          ))}
+          ))
+        )}
         </div>
       </main>
 
