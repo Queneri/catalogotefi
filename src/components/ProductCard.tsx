@@ -11,6 +11,17 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export interface Product {
   id: number;
@@ -27,6 +38,7 @@ interface ProductCardProps {
   onSizesUpdate: (id: number, newSizes: string[]) => void;
   onImagesUpdate: (id: number, newImages: string[]) => void;
   onNameUpdate: (id: number, newName: string) => void;
+  onDelete: (id: number) => void;
 }
 
 export const ProductCard = ({ 
@@ -34,7 +46,8 @@ export const ProductCard = ({
   onPriceUpdate, 
   onSizesUpdate, 
   onImagesUpdate,
-  onNameUpdate 
+  onNameUpdate,
+  onDelete
 }: ProductCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrice, setEditedPrice] = useState(product.price.toString());
@@ -98,7 +111,33 @@ export const ProductCard = ({
   };
 
   return (
-    <Card className="group overflow-hidden border-border bg-card transition-all hover:shadow-lg">
+    <Card className="group relative overflow-hidden border-border bg-card transition-all hover:shadow-lg">
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            size="sm"
+            variant="destructive"
+            className="absolute right-2 top-2 z-10 h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El producto "{product.name}" será eliminado permanentemente del catálogo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => onDelete(product.id)}>
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         <Carousel className="h-full w-full">
           <CarouselContent>

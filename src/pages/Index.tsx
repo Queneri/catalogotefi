@@ -68,6 +68,11 @@ const Index = () => {
     );
   };
 
+  const handleDeleteProduct = (id: number) => {
+    setProducts((prev) => prev.filter((product) => product.id !== id));
+    toast.success("Producto eliminado correctamente");
+  };
+
   const handleExportPDF = async () => {
     try {
       toast.info("Generando PDF...");
@@ -255,6 +260,7 @@ const Index = () => {
               onSizesUpdate={handleSizesUpdate}
               onImagesUpdate={handleImagesUpdate}
               onNameUpdate={handleNameUpdate}
+              onDelete={handleDeleteProduct}
             />
           ))}
         </div>
