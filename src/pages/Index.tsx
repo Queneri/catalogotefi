@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProductCard, Product } from "@/components/ProductCard";
 import { CatalogHeader } from "@/components/CatalogHeader";
 import { initialProducts } from "@/data/products";
@@ -24,7 +24,10 @@ import {
 } from "@/components/ui/select";
 
 const Index = () => {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>(() => {
+    const saved = localStorage.getItem("catalog-products");
+    return saved ? JSON.parse(saved) : initialProducts;
+  });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -33,6 +36,10 @@ const Index = () => {
     sizes: "",
     price: "",
   });
+
+  useEffect(() => {
+    localStorage.setItem("catalog-products", JSON.stringify(products));
+  }, [products]);
 
   const handlePriceUpdate = (id: number, newPrice: number) => {
     setProducts((prev) =>
