@@ -269,7 +269,9 @@ const Index = () => {
       <footer className="border-t border-border bg-background py-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm font-light text-muted-foreground">
-            © {new Date().getFullYear()} Anine Bing. Todos los derechos reservados.
+            Hecho con <span className="text-red-500 animate-pulse">❤️</span> por
+            Tefi • {products.length}{" "}
+            {products.length === 1 ? "producto" : "productos"}
           </p>
         </div>
       </footer>
