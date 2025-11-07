@@ -8,6 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
+import { z } from "zod";
+
+const productSchema = z.object({
+  name: z.string().trim().min(1, "El nombre es requerido").max(200, "El nombre es demasiado largo"),
+  category: z.enum(["T-Shirts", "Sweatshirts"], { errorMap: () => ({ message: "Categoría inválida" }) }),
+  price: z.number().positive("El precio debe ser positivo").max(999999, "El precio es demasiado alto"),
+  sizes: z.array(z.string().trim().min(1)).min(1, "Debe agregar al menos una talla"),
+  images: z.array(z.string()).min(1, "Debe agregar al menos una imagen").max(10, "Máximo 10 imágenes")
+});
 import {
   Dialog,
   DialogContent,
@@ -260,25 +269,39 @@ const Index = () => {
       return;
     }
 
-    if (!newProduct.name || !newProduct.price || !newProduct.sizes || newProduct.images.length === 0) {
-      toast.error("Por favor completa todos los campos y agrega al menos una imagen");
-      return;
-    }
-
     const sizesArray = newProduct.sizes
       .split(",")
       .map((s) => s.trim().toUpperCase())
       .filter((s) => s);
 
+    const priceValue = parseFloat(newProduct.price);
+
     try {
+      // Validate product data
+      const validationResult = productSchema.safeParse({
+        name: newProduct.name,
+        category: newProduct.category,
+        price: priceValue,
+        sizes: sizesArray,
+        images: newProduct.images,
+      });
+
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast.error(firstError.message);
+        return;
+      }
+
+      const validatedData = validationResult.data;
+
       const { data, error } = await supabase
         .from('products')
         .insert([{
-          name: newProduct.name,
-          category: newProduct.category,
-          images: newProduct.images,
-          sizes: sizesArray,
-          price: parseFloat(newProduct.price),
+          name: validatedData.name,
+          category: validatedData.category,
+          images: validatedData.images,
+          sizes: validatedData.sizes,
+          price: validatedData.price,
         }])
         .select()
         .single();

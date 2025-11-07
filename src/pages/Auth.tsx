@@ -6,6 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { User } from "@supabase/supabase-js";
+import { z } from "zod";
+
+const authSchema = z.object({
+  email: z.string().trim().email("Formato de email inválido").max(255, "Email demasiado largo"),
+  password: z.string()
+    .min(8, "La contraseña debe tener al menos 8 caracteres")
+    .max(100, "La contraseña es demasiado larga")
+    .regex(/[A-Z]/, "Debe contener al menos una mayúscula")
+    .regex(/[a-z]/, "Debe contener al menos una minúscula")
+    .regex(/[0-9]/, "Debe contener al menos un número")
+});
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -42,18 +53,27 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Validate input
+      const validationResult = authSchema.safeParse({ email, password });
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast.error(firstError.message);
+        setLoading(false);
+        return;
+      }
+
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+          email: validationResult.data.email,
+          password: validationResult.data.password,
         });
         if (error) throw error;
         toast.success("Inicio de sesión exitoso");
       } else {
         const redirectUrl = `${window.location.origin}/`;
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
+          email: validationResult.data.email,
+          password: validationResult.data.password,
           options: {
             emailRedirectTo: redirectUrl,
           },
