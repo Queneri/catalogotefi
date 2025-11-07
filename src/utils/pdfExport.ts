@@ -2,95 +2,94 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { Product } from "@/components/ProductCard";
 
-const loadImage = (url: string): Promise<HTMLImageElement> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = url;
-  });
-};
-
 export const exportToPDF = async (products: Product[]) => {
-  const pdf = new jsPDF("p", "mm", "a4");
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const margin = 15;
-  const imageWidth = 50;
-  const imageHeight = 65;
+  try {
+    // Find the products grid container
+    const productGrid = document.querySelector('.product-grid-container');
+    
+    if (!productGrid) {
+      console.error('No se encontró el contenedor del catálogo');
+      return;
+    }
 
-  // Header
-  pdf.setFontSize(24);
-  pdf.setFont("helvetica", "bold");
-  pdf.text("ANINE BING", pageWidth / 2, 20, { align: "center" });
-  
-  pdf.setFontSize(10);
-  pdf.setFont("helvetica", "normal");
-  pdf.text("CATÁLOGO DE PRODUCTOS", pageWidth / 2, 28, { align: "center" });
+    // Create a temporary container with white background for better PDF rendering
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.top = '0';
+    tempContainer.style.background = 'white';
+    tempContainer.style.padding = '40px';
+    tempContainer.style.width = '1200px';
+    
+    // Clone the content
+    const header = document.createElement('div');
+    header.style.textAlign = 'center';
+    header.style.marginBottom = '40px';
+    header.innerHTML = `
+      <h1 style="font-size: 32px; font-weight: 600; color: #000; margin-bottom: 8px;">ANINE BING</h1>
+      <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 3px; color: #666;">Catálogo de Productos</p>
+    `;
+    
+    tempContainer.appendChild(header);
+    
+    const clonedGrid = productGrid.cloneNode(true) as HTMLElement;
+    clonedGrid.style.display = 'grid';
+    clonedGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    clonedGrid.style.gap = '24px';
+    
+    tempContainer.appendChild(clonedGrid);
+    document.body.appendChild(tempContainer);
 
-  let yPosition = 40;
-  const lineHeight = 8;
-  const sectionGap = 15;
+    // Capture the element as canvas
+    const canvas = await html2canvas(tempContainer, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    });
 
-  for (const product of products) {
-    // Check if we need a new page
-    if (yPosition > pageHeight - 80) {
+    // Remove temp container
+    document.body.removeChild(tempContainer);
+
+    // Create PDF
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    
+    const imgWidth = pageWidth - 20; // 10mm margin on each side
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    let heightLeft = imgHeight;
+    let position = 10;
+
+    // Add first page
+    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+    heightLeft -= (pageHeight - 20);
+
+    // Add additional pages if needed
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight + 10;
       pdf.addPage();
-      yPosition = 20;
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - 20);
     }
 
-    try {
-      // Add first product image
-      const img = await loadImage(product.images[0]);
-      pdf.addImage(img, "JPEG", margin, yPosition, imageWidth, imageHeight);
-    } catch (error) {
-      console.error("Error loading image:", error);
+    // Add footer to all pages
+    const date = new Date().toLocaleDateString("es-ES");
+    const totalPages = pdf.getNumberOfPages();
+    
+    for (let i = 1; i <= totalPages; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text(`Generado el ${date}`, pageWidth / 2, pageHeight - 5, {
+        align: "center",
+      });
     }
 
-    // Position text next to image
-    const textX = margin + imageWidth + 10;
-    let textY = yPosition + 5;
-
-    // Product name
-    pdf.setFontSize(12);
-    pdf.setFont("helvetica", "bold");
-    pdf.text(product.name, textX, textY);
-    textY += lineHeight;
-
-    // Category
-    pdf.setFontSize(9);
-    pdf.setFont("helvetica", "normal");
-    pdf.setTextColor(100, 100, 100);
-    pdf.text(product.category.toUpperCase(), textX, textY);
-    textY += lineHeight;
-
-    // Sizes
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(`Talles: ${product.sizes.join(", ")}`, textX, textY);
-    textY += lineHeight;
-
-    // Price
-    pdf.setFontSize(11);
-    pdf.setFont("helvetica", "bold");
-    pdf.text(`$${product.price.toFixed(2)}`, textX, textY);
-
-    yPosition += imageHeight + sectionGap;
-
-    // Separator line
-    pdf.setDrawColor(200, 200, 200);
-    pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-    yPosition += sectionGap;
+    pdf.save("anine-bing-catalogo.pdf");
+  } catch (error) {
+    console.error('Error al generar PDF:', error);
   }
-
-  // Footer
-  const date = new Date().toLocaleDateString("es-ES");
-  pdf.setFontSize(8);
-  pdf.setFont("helvetica", "normal");
-  pdf.setTextColor(150, 150, 150);
-  pdf.text(`Generado el ${date}`, pageWidth / 2, pageHeight - 10, {
-    align: "center",
-  });
-
-  pdf.save("anine-bing-catalogo.pdf");
 };

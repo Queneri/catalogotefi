@@ -100,7 +100,7 @@ const Auth = () => {
             ANINE BING
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {isLogin ? "Inicia sesión en tu cuenta" : "Crea una nueva cuenta"}
+            {isLogin ? "Ingreso admin" : "Crea una nueva cuenta"}
           </p>
         </div>
 
@@ -135,7 +135,7 @@ const Auth = () => {
             {loading
               ? "Cargando..."
               : isLogin
-              ? "Iniciar Sesión"
+              ? "Ingreso admin"
               : "Crear Cuenta"}
           </Button>
 

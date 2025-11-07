@@ -56,7 +56,7 @@ export const CatalogHeader = ({
                 className="border-foreground text-foreground hover:bg-foreground hover:text-background"
               >
                 <LogIn className="mr-2 h-4 w-4" />
-                Iniciar Sesión
+                Ingreso admin
               </Button>
             )}
           </div>
