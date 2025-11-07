@@ -1,11 +1,22 @@
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, LogOut, LogIn } from "lucide-react";
+import { User } from "@supabase/supabase-js";
 
 interface CatalogHeaderProps {
   onExportPDF: () => void;
+  isAdmin: boolean;
+  user: User | null;
+  onLogout: () => void;
+  onLogin: () => void;
 }
 
-export const CatalogHeader = ({ onExportPDF }: CatalogHeaderProps) => {
+export const CatalogHeader = ({ 
+  onExportPDF, 
+  isAdmin, 
+  user,
+  onLogout,
+  onLogin
+}: CatalogHeaderProps) => {
   return (
     <header className="border-b border-border bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -18,14 +29,37 @@ export const CatalogHeader = ({ onExportPDF }: CatalogHeaderProps) => {
               Catálogo de Productos
             </p>
           </div>
-          <Button
-            onClick={onExportPDF}
-            variant="outline"
-            className="border-foreground text-foreground hover:bg-foreground hover:text-background"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Exportar a PDF
-          </Button>
+          <div className="flex gap-2">
+            {isAdmin && (
+              <Button
+                onClick={onExportPDF}
+                variant="outline"
+                className="border-foreground text-foreground hover:bg-foreground hover:text-background"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Exportar a PDF
+              </Button>
+            )}
+            {user ? (
+              <Button
+                onClick={onLogout}
+                variant="outline"
+                className="border-foreground text-foreground hover:bg-foreground hover:text-background"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Cerrar Sesión
+              </Button>
+            ) : (
+              <Button
+                onClick={onLogin}
+                variant="outline"
+                className="border-foreground text-foreground hover:bg-foreground hover:text-background"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Iniciar Sesión
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </header>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ProductCard, Product } from "@/components/ProductCard";
 import { CatalogHeader } from "@/components/CatalogHeader";
 import { exportToPDF } from "@/utils/pdfExport";
@@ -6,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
 import {
   Dialog,
   DialogContent,
@@ -24,9 +26,13 @@ import {
 } from "@/components/ui/select";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
     category: "T-Shirts",
@@ -35,10 +41,53 @@ const Index = () => {
     price: "",
   });
 
-  // Load products from database
+  // Check authentication and load products
   useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
     loadProducts();
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
+          .maybeSingle();
+
+        if (error) throw error;
+        setIsAdmin(!!data);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   const loadProducts = async () => {
     try {
@@ -206,6 +255,11 @@ const Index = () => {
   };
 
   const handleAddProduct = async () => {
+    if (!isAdmin) {
+      toast.error("No tienes permisos para agregar productos");
+      return;
+    }
+
     if (!newProduct.name || !newProduct.price || !newProduct.sizes || newProduct.images.length === 0) {
       toast.error("Por favor completa todos los campos y agrega al menos una imagen");
       return;
@@ -256,13 +310,30 @@ const Index = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Sesión cerrada correctamente");
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast.error("Error al cerrar sesión");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <CatalogHeader onExportPDF={handleExportPDF} />
+      <CatalogHeader 
+        onExportPDF={handleExportPDF} 
+        isAdmin={isAdmin} 
+        user={user}
+        onLogout={handleLogout}
+        onLogin={() => navigate("/auth")}
+      />
       
       <main className="container mx-auto px-4 py-12">
-        <div className="mb-8 flex justify-end">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        {isAdmin && (
+          <div className="mb-8 flex justify-end">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -363,7 +434,8 @@ const Index = () => {
               </div>
             </DialogContent>
           </Dialog>
-        </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {isLoading ? (
@@ -379,6 +451,7 @@ const Index = () => {
             <ProductCard
               key={product.id}
               product={product}
+              isAdmin={isAdmin}
               onPriceUpdate={handlePriceUpdate}
               onSizesUpdate={handleSizesUpdate}
               onImagesUpdate={handleImagesUpdate}

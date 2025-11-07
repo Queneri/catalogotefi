@@ -34,6 +34,7 @@ export interface Product {
 
 interface ProductCardProps {
   product: Product;
+  isAdmin: boolean;
   onPriceUpdate: (id: number | string, newPrice: number) => void;
   onSizesUpdate: (id: number | string, newSizes: string[]) => void;
   onImagesUpdate: (id: number | string, newImages: string[]) => void;
@@ -42,7 +43,8 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ 
-  product, 
+  product,
+  isAdmin,
   onPriceUpdate, 
   onSizesUpdate, 
   onImagesUpdate,
@@ -112,16 +114,17 @@ export const ProductCard = ({
 
   return (
     <Card className="group relative overflow-hidden border-border bg-card transition-all hover:shadow-lg">
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button
-            size="sm"
-            variant="destructive"
-            className="absolute right-2 top-2 z-10 h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </AlertDialogTrigger>
+      {isAdmin && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              size="sm"
+              variant="destructive"
+              className="absolute right-2 top-2 z-10 h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
@@ -136,7 +139,8 @@ export const ProductCard = ({
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+        </AlertDialog>
+      )}
       
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         <Carousel className="h-full w-full">
@@ -148,7 +152,7 @@ export const ProductCard = ({
                   alt={`${product.name} - ${index + 1}`}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                {isEditing && product.images.length > 1 && (
+                {isAdmin && isEditing && product.images.length > 1 && (
                   <Button
                     size="sm"
                     variant="destructive"
@@ -168,30 +172,34 @@ export const ProductCard = ({
             </>
           )}
         </Carousel>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => fileInputRef.current?.click()}
-          className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
-        >
-          <Upload className="mr-1 h-3 w-3" />
-          {product.images.length > 0 ? "Agregar" : "Subir"}
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleImageChange}
-          className="hidden"
-        />
+        {isAdmin && (
+          <>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100"
+            >
+              <Upload className="mr-1 h-3 w-3" />
+              {product.images.length > 0 ? "Agregar" : "Subir"}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </>
+        )}
       </div>
       <div className="space-y-3 p-4">
         <div>
           <p className="text-xs font-light uppercase tracking-wider text-muted-foreground">
             {product.category}
           </p>
-          {isEditing ? (
+          {isAdmin && isEditing ? (
             <Input
               value={editedName}
               onChange={(e) => setEditedName(e.target.value)}
@@ -202,7 +210,7 @@ export const ProductCard = ({
           )}
         </div>
 
-        {isEditing ? (
+        {isAdmin && isEditing ? (
           <div className="space-y-2">
             <div className="flex flex-wrap gap-1.5">
               {editedSizes.map((size) => (
@@ -254,7 +262,7 @@ export const ProductCard = ({
         )}
 
         <div className="flex items-center justify-between border-t border-border pt-3">
-          {isEditing ? (
+          {isAdmin && isEditing ? (
             <div className="flex w-full items-center gap-2">
               <Input
                 type="number"
@@ -285,14 +293,16 @@ export const ProductCard = ({
               <span className="text-lg font-medium text-foreground">
                 ${product.price.toFixed(2)}
               </span>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setIsEditing(true)}
-                className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
+              {isAdmin && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsEditing(true)}
+                  className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
             </>
           )}
         </div>
