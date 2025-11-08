@@ -23,7 +23,7 @@ export const CatalogHeader = ({
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div>
             <h1 className="text-4xl font-semibold tracking-tight text-foreground">
-              ANINE BING
+              ANINE BING & GOLDEN GOOSE
             </h1>
             <p className="mt-1 text-sm font-light uppercase tracking-widest text-muted-foreground">
               Catálogo de Productos
