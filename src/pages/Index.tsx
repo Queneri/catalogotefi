@@ -15,7 +15,8 @@ const productSchema = z.object({
   category: z.enum(["T-Shirts", "Sweatshirts"], { errorMap: () => ({ message: "Categoría inválida" }) }),
   price: z.number().positive("El precio debe ser positivo").max(999999, "El precio es demasiado alto"),
   sizes: z.array(z.string().trim().min(1)).min(1, "Debe agregar al menos una talla"),
-  images: z.array(z.string()).min(1, "Debe agregar al menos una imagen").max(10, "Máximo 10 imágenes")
+  images: z.array(z.string()).min(1, "Debe agregar al menos una imagen").max(10, "Máximo 10 imágenes"),
+  seña: z.number().nonnegative("La seña no puede ser negativa").max(999999, "La seña es demasiado alta").optional()
 });
 import {
   Dialog,
@@ -48,6 +49,7 @@ const Index = () => {
     images: [] as string[],
     sizes: "",
     price: "",
+    seña: "",
   });
 
   // Check authentication and load products
@@ -114,6 +116,7 @@ const Index = () => {
         images: item.images,
         sizes: item.sizes,
         price: item.price,
+        seña: item.seña || undefined,
       }));
 
       setProducts(formattedProducts);
@@ -209,6 +212,27 @@ const Index = () => {
     }
   };
 
+  const handleSeñaUpdate = async (id: number | string, newSeña: number) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ seña: newSeña })
+        .eq('id', String(id));
+
+      if (error) throw error;
+
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === id ? { ...product, seña: newSeña } : product
+        )
+      );
+      toast.success("Seña actualizada correctamente");
+    } catch (error) {
+      console.error('Error updating seña:', error);
+      toast.error('Error al actualizar la seña');
+    }
+  };
+
   const handleDeleteProduct = async (id: number | string) => {
     try {
       const { error } = await supabase
@@ -275,6 +299,7 @@ const Index = () => {
       .filter((s) => s);
 
     const priceValue = parseFloat(newProduct.price);
+    const señaValue = newProduct.seña ? parseFloat(newProduct.seña) : undefined;
 
     try {
       // Validate product data
@@ -284,6 +309,7 @@ const Index = () => {
         price: priceValue,
         sizes: sizesArray,
         images: newProduct.images,
+        seña: señaValue,
       });
 
       if (!validationResult.success) {
@@ -302,6 +328,7 @@ const Index = () => {
           images: validatedData.images,
           sizes: validatedData.sizes,
           price: validatedData.price,
+          seña: validatedData.seña || null,
         }])
         .select()
         .single();
@@ -315,6 +342,7 @@ const Index = () => {
         images: data.images,
         sizes: data.sizes,
         price: data.price,
+        seña: data.seña || undefined,
       };
 
       setProducts([product, ...products]);
@@ -324,6 +352,7 @@ const Index = () => {
         images: [],
         sizes: "",
         price: "",
+        seña: "",
       });
       setIsDialogOpen(false);
       toast.success("Producto agregado correctamente");
@@ -421,6 +450,19 @@ const Index = () => {
                   />
                 </div>
                 <div className="grid gap-2">
+                  <Label htmlFor="seña">Seña (opcional)</Label>
+                  <Input
+                    id="seña"
+                    type="number"
+                    step="0.01"
+                    value={newProduct.seña}
+                    onChange={(e) =>
+                      setNewProduct({ ...newProduct, seña: e.target.value })
+                    }
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="grid gap-2">
                   <Label htmlFor="image">Imágenes del producto</Label>
                   <Input
                     id="image"
@@ -480,6 +522,7 @@ const Index = () => {
               onImagesUpdate={handleImagesUpdate}
               onNameUpdate={handleNameUpdate}
               onDelete={handleDeleteProduct}
+              onSeñaUpdate={handleSeñaUpdate}
             />
           ))
         )}

@@ -30,6 +30,7 @@ export interface Product {
   images: string[];
   sizes: string[];
   price: number;
+  seña?: number;
 }
 
 interface ProductCardProps {
@@ -40,6 +41,7 @@ interface ProductCardProps {
   onImagesUpdate: (id: number | string, newImages: string[]) => void;
   onNameUpdate: (id: number | string, newName: string) => void;
   onDelete: (id: number | string) => void;
+  onSeñaUpdate: (id: number | string, newSeña: number) => void;
 }
 
 export const ProductCard = ({ 
@@ -49,10 +51,12 @@ export const ProductCard = ({
   onSizesUpdate, 
   onImagesUpdate,
   onNameUpdate,
-  onDelete
+  onDelete,
+  onSeñaUpdate
 }: ProductCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrice, setEditedPrice] = useState(product.price.toString());
+  const [editedSeña, setEditedSeña] = useState(product.seña?.toString() || "");
   const [editedSizes, setEditedSizes] = useState<string[]>(product.sizes);
   const [editedName, setEditedName] = useState(product.name);
   const [newSize, setNewSize] = useState("");
@@ -60,16 +64,21 @@ export const ProductCard = ({
 
   const handleSave = () => {
     const newPrice = parseFloat(editedPrice);
+    const newSeña = editedSeña ? parseFloat(editedSeña) : 0;
     if (!isNaN(newPrice) && newPrice > 0) {
       onPriceUpdate(product.id, newPrice);
       onSizesUpdate(product.id, editedSizes);
       onNameUpdate(product.id, editedName);
+      if (!isNaN(newSeña)) {
+        onSeñaUpdate(product.id, newSeña);
+      }
       setIsEditing(false);
     }
   };
 
   const handleCancel = () => {
     setEditedPrice(product.price.toString());
+    setEditedSeña(product.seña?.toString() || "");
     setEditedSizes(product.sizes);
     setEditedName(product.name);
     setIsEditing(false);
@@ -261,38 +270,63 @@ export const ProductCard = ({
           </div>
         )}
 
-        <div className="flex items-center justify-between border-t border-border pt-3">
+        <div className="border-t border-border pt-3">
           {isAdmin && isEditing ? (
-            <div className="flex w-full items-center gap-2">
-              <Input
-                type="number"
-                value={editedPrice}
-                onChange={(e) => setEditedPrice(e.target.value)}
-                className="h-8 w-24 text-sm"
-                step="0.01"
-              />
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleSave}
-                className="h-8 w-8 p-0"
-              >
-                <Check className="h-4 w-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleCancel}
-                className="h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground w-12">Precio:</span>
+                <Input
+                  type="number"
+                  value={editedPrice}
+                  onChange={(e) => setEditedPrice(e.target.value)}
+                  className="h-8 flex-1 text-sm"
+                  step="0.01"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground w-12">Seña:</span>
+                <Input
+                  type="number"
+                  value={editedSeña}
+                  onChange={(e) => setEditedSeña(e.target.value)}
+                  className="h-8 flex-1 text-sm"
+                  step="0.01"
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleSave}
+                  className="h-8 w-8 p-0"
+                >
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleCancel}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           ) : (
-            <>
-              <span className="text-lg font-medium text-foreground">
-                ${product.price.toFixed(2)}
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-medium text-foreground">
+                    ${product.price.toFixed(2)}
+                  </span>
+                </div>
+                {product.seña !== undefined && product.seña > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    Seña: ${product.seña.toFixed(2)}
+                  </div>
+                )}
+              </div>
               {isAdmin && (
                 <Button
                   size="sm"
@@ -303,7 +337,7 @@ export const ProductCard = ({
                   <Pencil className="h-4 w-4" />
                 </Button>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>
