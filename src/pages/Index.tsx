@@ -12,7 +12,7 @@ import { z } from "zod";
 
 const productSchema = z.object({
   name: z.string().trim().min(1, "El nombre es requerido").max(200, "El nombre es demasiado largo"),
-  category: z.enum(["T-Shirts", "Sweatshirts"], { errorMap: () => ({ message: "Categoría inválida" }) }),
+  category: z.enum(["T-Shirts", "Sweatshirts", "Shoes", "Pants", "Jackets", "Accessories"], { errorMap: () => ({ message: "Categoría inválida" }) }),
   price: z.number().positive("El precio debe ser positivo").max(999999, "El precio es demasiado alto"),
   sizes: z.array(z.string().trim().min(1)).min(1, "Debe agregar al menos una talla"),
   images: z.array(z.string()).min(1, "Debe agregar al menos una imagen").max(10, "Máximo 10 imágenes"),
@@ -422,6 +422,10 @@ const Index = () => {
                     <SelectContent>
                       <SelectItem value="T-Shirts">Remeras</SelectItem>
                       <SelectItem value="Sweatshirts">Buzos</SelectItem>
+                      <SelectItem value="Shoes">Zapatillas</SelectItem>
+                      <SelectItem value="Pants">Pantalones</SelectItem>
+                      <SelectItem value="Jackets">Camperas</SelectItem>
+                      <SelectItem value="Accessories">Accesorios</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
