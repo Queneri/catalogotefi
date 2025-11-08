@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Check, X, Upload, Plus, Trash2 } from "lucide-react";
+import { Pencil, Check, X, Upload, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -121,6 +121,22 @@ export const ProductCard = ({
     setEditedSizes(editedSizes.filter(size => size !== sizeToRemove));
   };
 
+  const handleMoveImageUp = (index: number) => {
+    if (index > 0) {
+      const newImages = [...product.images];
+      [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]];
+      onImagesUpdate(product.id, newImages);
+    }
+  };
+
+  const handleMoveImageDown = (index: number) => {
+    if (index < product.images.length - 1) {
+      const newImages = [...product.images];
+      [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
+      onImagesUpdate(product.id, newImages);
+    }
+  };
+
   return (
     <Card className="group relative overflow-hidden border-border bg-card transition-all hover:shadow-lg">
       {isAdmin && (
@@ -161,15 +177,39 @@ export const ProductCard = ({
                   alt={`${product.name} - ${index + 1}`}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                {isAdmin && isEditing && product.images.length > 1 && (
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleRemoveImage(index)}
-                    className="absolute right-2 top-2"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                {isAdmin && isEditing && (
+                  <div className="absolute right-2 top-2 flex flex-col gap-1">
+                    {index > 0 && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleMoveImageUp(index)}
+                        className="h-7 w-7 p-0"
+                      >
+                        <ChevronUp className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {index < product.images.length - 1 && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleMoveImageDown(index)}
+                        className="h-7 w-7 p-0"
+                      >
+                        <ChevronDown className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {product.images.length > 1 && (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRemoveImage(index)}
+                        className="h-7 w-7 p-0"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 )}
               </CarouselItem>
             ))}
