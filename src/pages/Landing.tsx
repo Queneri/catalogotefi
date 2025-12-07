@@ -86,7 +86,7 @@ const Landing = () => {
               </div>
               
               <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-                Es uno que, aunque mantiene la calidad de la marca, no pasó sus controles ultraestrictos por detalles menores, tipo costura distinta o un brillo que no es perfecto. Por eso sale barato—<span className="text-foreground font-medium">mismo lujo, menos drama.</span>
+                Producto Outlet oficial: mantiene la calidad y autenticidad de la marca, pero no ingresó a boutique por no cumplir sus estándares ultra exigentes de terminación. No afecta la funcionalidad; solo reduce el precio. <span className="text-foreground font-medium">Mismo lujo, valor más accesible.</span>
               </p>
             </div>
           </div>
