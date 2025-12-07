@@ -43,6 +43,9 @@ const Landing = () => {
               <p className="text-muted-foreground leading-relaxed text-sm md:text-base mt-3">
                 No afecta la funcionalidad; solo reduce el precio. <span className="text-foreground font-medium">Mismo lujo, valor más accesible.</span>
               </p>
+              <p className="text-foreground font-medium leading-relaxed text-sm md:text-base mt-4 pt-4 border-t border-foreground/10 italic">
+                Si querés el modelo idéntico al de la web oficial, lo mejor es comprar ahí; pero si buscás lujo real a un precio más amable, conmigo lo tenés.
+              </p>
             </div>
           </div>
         </div>
