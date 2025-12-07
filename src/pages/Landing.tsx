@@ -15,22 +15,22 @@ const Landing = () => {
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl w-full">
           {/* Anine Bing Card */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
             onClick={() => navigate("/anine-bing")}
             className="group cursor-pointer"
           >
-            <div className="relative overflow-hidden rounded-lg border border-border bg-card aspect-[4/5] flex flex-col items-center justify-center transition-all duration-300 hover:shadow-xl hover:border-foreground/20">
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/80" />
+            <div className="relative overflow-hidden rounded-lg border border-border bg-card aspect-[3/4] md:aspect-[4/5] flex flex-col items-center justify-center transition-all duration-300 hover:shadow-2xl hover:border-foreground/30 hover:scale-[1.02]">
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative z-10 text-center p-8">
                 <h2 className="text-4xl md:text-5xl font-light tracking-[0.2em] uppercase text-foreground mb-4 group-hover:tracking-[0.3em] transition-all duration-300">
                   Anine Bing
                 </h2>
-                <p className="text-muted-foreground text-sm tracking-widest uppercase">
+                <p className="text-muted-foreground text-sm tracking-widest uppercase opacity-70 group-hover:opacity-100 transition-opacity duration-300">
                   Ver colección
                 </p>
                 <div className="mt-6 w-12 h-[1px] bg-foreground/30 mx-auto group-hover:w-24 transition-all duration-300" />
@@ -40,19 +40,19 @@ const Landing = () => {
 
           {/* Golden Goose Card */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             onClick={() => navigate("/golden-goose")}
             className="group cursor-pointer"
           >
-            <div className="relative overflow-hidden rounded-lg border border-border bg-card aspect-[4/5] flex flex-col items-center justify-center transition-all duration-300 hover:shadow-xl hover:border-foreground/20">
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/80" />
+            <div className="relative overflow-hidden rounded-lg border border-border bg-card aspect-[3/4] md:aspect-[4/5] flex flex-col items-center justify-center transition-all duration-300 hover:shadow-2xl hover:border-foreground/30 hover:scale-[1.02]">
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative z-10 text-center p-8">
                 <h2 className="text-4xl md:text-5xl font-light tracking-[0.2em] uppercase text-foreground mb-4 group-hover:tracking-[0.3em] transition-all duration-300">
                   Golden Goose
                 </h2>
-                <p className="text-muted-foreground text-sm tracking-widest uppercase">
+                <p className="text-muted-foreground text-sm tracking-widest uppercase opacity-70 group-hover:opacity-100 transition-opacity duration-300">
                   Ver colección
                 </p>
                 <div className="mt-6 w-12 h-[1px] bg-foreground/30 mx-auto group-hover:w-24 transition-all duration-300" />
