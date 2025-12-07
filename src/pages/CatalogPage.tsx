@@ -115,6 +115,7 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
+        .eq('brand', brand)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -338,6 +339,7 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
           sizes: validatedData.sizes,
           price: validatedData.price,
           seña: validatedData.seña || null,
+          brand: brand,
         }])
         .select()
         .single();
