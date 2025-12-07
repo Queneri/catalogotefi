@@ -29,7 +29,7 @@ import {
 
 const productSchema = z.object({
   name: z.string().trim().min(1, "El nombre es requerido").max(200, "El nombre es demasiado largo"),
-  category: z.enum(["T-Shirts", "Sweatshirts", "Shoes", "Pants", "Jackets", "Accessories"], { errorMap: () => ({ message: "Categoría inválida" }) }),
+  category: z.enum(["Remeras", "Buzos", "Zapatillas", "Pantalones", "Camperas", "Accesorios"], { errorMap: () => ({ message: "Categoría inválida" }) }),
   price: z.number().positive("El precio debe ser positivo").max(999999, "El precio es demasiado alto"),
   sizes: z.array(z.string().trim().min(1)).min(1, "Debe agregar al menos una talla"),
   images: z.array(z.string()).min(1, "Debe agregar al menos una imagen").max(10, "Máximo 10 imágenes"),
@@ -55,7 +55,7 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
-    category: "T-Shirts",
+    category: "Remeras",
     images: [] as string[],
     sizes: "",
     price: "",
@@ -359,7 +359,7 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
       setProducts([product, ...products]);
       setNewProduct({
         name: "",
-        category: "T-Shirts",
+        category: "Remeras",
         images: [],
         sizes: "",
         price: "",
@@ -452,12 +452,12 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="T-Shirts">Remeras</SelectItem>
-                        <SelectItem value="Sweatshirts">Buzos</SelectItem>
-                        <SelectItem value="Shoes">Zapatillas</SelectItem>
-                        <SelectItem value="Pants">Pantalones</SelectItem>
-                        <SelectItem value="Jackets">Camperas</SelectItem>
-                        <SelectItem value="Accessories">Accesorios</SelectItem>
+                        <SelectItem value="Remeras">Remeras</SelectItem>
+                        <SelectItem value="Buzos">Buzos</SelectItem>
+                        <SelectItem value="Zapatillas">Zapatillas</SelectItem>
+                        <SelectItem value="Pantalones">Pantalones</SelectItem>
+                        <SelectItem value="Camperas">Camperas</SelectItem>
+                        <SelectItem value="Accesorios">Accesorios</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
