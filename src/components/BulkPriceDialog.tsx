@@ -73,18 +73,19 @@ export const BulkPriceDialog = ({ products, onProductsUpdate, brand }: BulkPrice
         ? 1 + (percentageValue / 100) 
         : 1 - (percentageValue / 100);
 
-      // Update each product
+      // Update each product with rounded price and 50% seña
       const updatePromises = productsToUpdate.map(async (product) => {
-        const newPrice = Math.round(product.price * multiplier * 100) / 100;
+        const newPrice = Math.round(product.price * multiplier); // Rounded, no decimals
+        const newSeña = Math.round(newPrice * 0.5); // 50% of new price, also rounded
         
         const { error } = await supabase
           .from('products')
-          .update({ price: newPrice })
+          .update({ price: newPrice, seña: newSeña })
           .eq('id', String(product.id));
 
         if (error) throw error;
 
-        return { ...product, price: newPrice };
+        return { ...product, price: newPrice, seña: newSeña };
       });
 
       const updatedProducts = await Promise.all(updatePromises);
