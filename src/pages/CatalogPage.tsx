@@ -7,7 +7,7 @@ import { exportToPDF } from "@/utils/pdfExport";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Plus, X, ArrowLeft } from "lucide-react";
+import { Plus, X, ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { z } from "zod";
@@ -542,9 +542,7 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
         <div className="product-grid-container grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {isLoading ? (
             <div className="col-span-full flex flex-col items-center justify-center py-12 gap-4">
-              <div className="w-48">
-                <Progress value={undefined} className="h-2 animate-pulse" />
-              </div>
+              <Loader2 className="h-10 w-10 text-primary animate-spin" />
               <p className="text-muted-foreground">Cargando productos...</p>
             </div>
           ) : products.length === 0 ? (
