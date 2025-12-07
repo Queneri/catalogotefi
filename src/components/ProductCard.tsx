@@ -33,6 +33,21 @@ export interface Product {
   seña?: number;
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  "T-Shirts": "Remeras",
+  "Sweatshirts": "Buzos",
+  "Shoes": "Zapatillas",
+  "Pants": "Pantalones",
+  "Jackets": "Camperas",
+  "Accessories": "Accesorios",
+  "Remeras": "Remeras",
+  "Buzos": "Buzos",
+  "Zapatillas": "Zapatillas",
+  "Pantalones": "Pantalones",
+  "Camperas": "Camperas",
+  "Accesorios": "Accesorios",
+};
+
 interface ProductCardProps {
   product: Product;
   isAdmin: boolean;
@@ -246,7 +261,7 @@ export const ProductCard = ({
       <div className="space-y-3 p-4">
         <div>
           <p className="text-xs font-light uppercase tracking-wider text-muted-foreground">
-            {product.category}
+            {CATEGORY_LABELS[product.category] || product.category}
           </p>
           {isAdmin && isEditing ? (
             <Input
