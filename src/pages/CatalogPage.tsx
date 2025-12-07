@@ -480,14 +480,23 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
                       type="number"
                       step="0.01"
                       value={newProduct.price}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, price: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const price = e.target.value;
+                        const priceNum = parseFloat(price);
+                        const autoSeña = !isNaN(priceNum) && priceNum > 0 
+                          ? (priceNum * 0.5).toFixed(2) 
+                          : "";
+                        setNewProduct({ 
+                          ...newProduct, 
+                          price: price,
+                          seña: autoSeña
+                        });
+                      }}
                       placeholder="0.00"
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="seña">Seña (opcional)</Label>
+                    <Label htmlFor="seña">Seña (50% automático, editable)</Label>
                     <Input
                       id="seña"
                       type="number"
