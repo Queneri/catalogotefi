@@ -45,10 +45,12 @@ export const BulkPriceDialog = ({ products, onProductsUpdate, brand }: BulkPrice
   const [isLoading, setIsLoading] = useState(false);
 
   const handleApplyChange = async () => {
-    const percentageValue = parseFloat(percentage);
+    // Replace comma with dot for parsing (supports both formats)
+    const normalizedPercentage = percentage.replace(',', '.');
+    const percentageValue = parseFloat(normalizedPercentage);
     
-    if (isNaN(percentageValue) || percentageValue <= 0 || percentageValue > 100) {
-      toast.error("Ingresa un porcentaje válido (1-100)");
+    if (isNaN(percentageValue) || percentageValue <= 0) {
+      toast.error("Ingresa un porcentaje válido mayor a 0");
       return;
     }
 
@@ -175,13 +177,11 @@ export const BulkPriceDialog = ({ products, onProductsUpdate, brand }: BulkPrice
             <Label htmlFor="percentage">Porcentaje (%)</Label>
             <Input
               id="percentage"
-              type="number"
-              min="1"
-              max="100"
-              step="1"
+              type="text"
+              inputMode="decimal"
               value={percentage}
               onChange={(e) => setPercentage(e.target.value)}
-              placeholder="Ej: 10"
+              placeholder="Ej: 10 o 1,8868"
             />
           </div>
 
