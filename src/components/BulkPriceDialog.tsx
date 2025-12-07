@@ -29,12 +29,12 @@ interface BulkPriceDialogProps {
 
 const CATEGORIES = [
   { value: "all", label: "Todas las categorías" },
-  { value: "T-Shirts", label: "Remeras" },
-  { value: "Sweatshirts", label: "Buzos" },
-  { value: "Shoes", label: "Zapatillas" },
-  { value: "Pants", label: "Pantalones" },
-  { value: "Jackets", label: "Camperas" },
-  { value: "Accessories", label: "Accesorios" },
+  { value: "Remeras", label: "Remeras" },
+  { value: "Buzos", label: "Buzos" },
+  { value: "Zapatillas", label: "Zapatillas" },
+  { value: "Pantalones", label: "Pantalones" },
+  { value: "Camperas", label: "Camperas" },
+  { value: "Accesorios", label: "Accesorios" },
 ];
 
 export const BulkPriceDialog = ({ products, onProductsUpdate, brand }: BulkPriceDialogProps) => {
