@@ -38,7 +38,7 @@ const Landing = () => {
               </div>
               
               <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-                Mantiene la calidad y autenticidad de la marca, pero no ingresó a boutique por no cumplir sus estándares ultra exigentes de terminación. No afecta la funcionalidad; solo reduce el precio. <span className="text-foreground font-medium">Mismo lujo, valor más accesible.</span>
+                Mantiene la calidad y autenticidad de la marca, pero no ingresó a locales por no cumplir sus estándares ultra exigentes de terminación. No afecta la funcionalidad; solo reduce el precio. <span className="text-foreground font-medium">Mismo lujo, valor más accesible.</span>
               </p>
             </div>
           </div>
