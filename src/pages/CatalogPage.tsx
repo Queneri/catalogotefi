@@ -34,7 +34,6 @@ const productSchema = z.object({
   sizes: z.array(z.string().trim().min(1)).min(1, "Debe agregar al menos una talla"),
   images: z.array(z.string()).min(1, "Debe agregar al menos una imagen").max(10, "Máximo 10 imágenes"),
   seña: z.number().nonnegative("La seña no puede ser negativa").max(999999, "La seña es demasiado alta").optional(),
-  brand: z.string().min(1, "La marca es requerida"),
 });
 
 interface CatalogPageProps {
@@ -116,7 +115,6 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('brand', brand)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -129,7 +127,6 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
         sizes: item.sizes,
         price: item.price,
         seña: item.seña || undefined,
-        brand: item.brand || undefined,
       }));
 
       setProducts(formattedProducts);
@@ -322,7 +319,6 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
         sizes: sizesArray,
         images: newProduct.images,
         seña: señaValue,
-        brand: brand,
       });
 
       if (!validationResult.success) {
@@ -342,7 +338,6 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
           sizes: validatedData.sizes,
           price: validatedData.price,
           seña: validatedData.seña || null,
-          brand: brand,
         }])
         .select()
         .single();
@@ -357,7 +352,6 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
         sizes: data.sizes,
         price: data.price,
         seña: data.seña || undefined,
-        brand: data.brand || undefined,
       };
 
       setProducts([product, ...products]);
