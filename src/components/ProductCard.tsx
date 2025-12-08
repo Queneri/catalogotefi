@@ -395,18 +395,20 @@ export const ProductCard = ({
                 )}
               </div>
               {!isAdmin && (
-                <Button
-                  size="sm"
-                  className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white"
-                  onClick={() => {
-                    const message = `Hola! Me interesa el producto:\n\n*${product.name}*\nPrecio: $${product.price.toFixed(2)}`;
-                    const whatsappUrl = `https://wa.me/5491123197552?text=${encodeURIComponent(message)}`;
-                    window.open(whatsappUrl, '_blank');
-                  }}
+                <a
+                  href={`https://wa.me/5491123197552?text=${encodeURIComponent(`Hola! Me interesa el producto:\n\n*${product.name}*\nPrecio: $${product.price.toFixed(2)}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
                 >
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Comprar
-                </Button>
+                  <Button
+                    size="sm"
+                    className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white"
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Comprar
+                  </Button>
+                </a>
               )}
             </div>
           )}
