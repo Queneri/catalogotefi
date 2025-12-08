@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Check, X, Upload, Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import { Pencil, Check, X, Upload, Plus, Trash2, ChevronUp, ChevronDown, MessageCircle } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -369,27 +369,43 @@ export const ProductCard = ({
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-medium text-foreground">
-                    ${product.price.toFixed(2)}
-                  </span>
-                </div>
-                {product.seña !== undefined && product.seña > 0 && (
-                  <div className="text-xs text-muted-foreground">
-                    Seña: ${product.seña.toFixed(2)}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-medium text-foreground">
+                      ${product.price.toFixed(2)}
+                    </span>
                   </div>
+                  {product.seña !== undefined && product.seña > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      Seña: ${product.seña.toFixed(2)}
+                    </div>
+                  )}
+                </div>
+                {isAdmin && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsEditing(true)}
+                    className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                 )}
               </div>
-              {isAdmin && (
+              {!isAdmin && (
                 <Button
                   size="sm"
-                  variant="ghost"
-                  onClick={() => setIsEditing(true)}
-                  className="h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white"
+                  onClick={() => {
+                    const message = `Hola! Me interesa el producto:\n\n*${product.name}*\nPrecio: $${product.price.toFixed(2)}`;
+                    const whatsappUrl = `https://wa.me/5491123197552?text=${encodeURIComponent(message)}`;
+                    window.open(whatsappUrl, '_blank');
+                  }}
                 >
-                  <Pencil className="h-4 w-4" />
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Comprar
                 </Button>
               )}
             </div>
