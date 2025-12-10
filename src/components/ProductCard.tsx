@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, forwardRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Check, X, Upload, Plus, Trash2, ChevronUp, ChevronDown, MessageCircle } from "lucide-react";
+import { Pencil, Check, X, Upload, Plus, Trash2, ChevronUp, ChevronDown, MessageCircle, GripVertical } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -11,6 +11,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,6 +60,34 @@ interface ProductCardProps {
   onNameUpdate: (id: number | string, newName: string) => void;
   onDelete: (id: number | string) => void;
   onSeñaUpdate: (id: number | string, newSeña: number) => void;
+  isDragging?: boolean;
+}
+
+export const SortableProductCard = (props: ProductCardProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: String(props.product.id) });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <ProductCard {...props} isDragging={isDragging} dragHandleProps={{ ...attributes, ...listeners }} />
+    </div>
+  );
+};
+
+interface ProductCardInternalProps extends ProductCardProps {
+  dragHandleProps?: Record<string, any>;
 }
 
 export const ProductCard = ({ 
@@ -69,8 +99,10 @@ export const ProductCard = ({
   onImagesUpdate,
   onNameUpdate,
   onDelete,
-  onSeñaUpdate
-}: ProductCardProps) => {
+  onSeñaUpdate,
+  isDragging,
+  dragHandleProps,
+}: ProductCardInternalProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrice, setEditedPrice] = useState(product.price.toString());
   const [editedSeña, setEditedSeña] = useState(product.seña?.toString() || "");
@@ -157,43 +189,55 @@ export const ProductCard = ({
   return (
     <Card className="group relative overflow-hidden border-border bg-card transition-all hover:shadow-lg">
       {isAdmin && (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              size="sm"
-              variant="destructive"
-              className="absolute right-2 top-2 z-10 h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acción no se puede deshacer. El producto "{product.name}" será eliminado permanentemente del catálogo.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => onDelete(product.id)}>
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-        </AlertDialog>
+        <>
+          {/* Drag handle */}
+          <div
+            {...dragHandleProps}
+            className="absolute left-2 top-2 z-10 flex h-8 w-8 cursor-grab items-center justify-center rounded bg-background/80 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+          >
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="absolute right-2 top-2 z-10 h-8 w-8 p-0 opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta acción no se puede deshacer. El producto "{product.name}" será eliminado permanentemente del catálogo.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(product.id)}>
+                  Eliminar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </>
       )}
       
-      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+      <div className="relative aspect-square overflow-hidden bg-muted">
         <Carousel className="h-full w-full">
-          <CarouselContent>
+          <CarouselContent className="h-full">
             {product.images.map((image, index) => (
-              <CarouselItem key={index} className="relative">
-                <img
-                  src={image}
-                  alt={`${product.name} - ${index + 1}`}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+              <CarouselItem key={index} className="relative h-full">
+                <div className="flex h-full w-full items-center justify-center bg-muted">
+                  <img
+                    src={image}
+                    alt={`${product.name} - ${index + 1}`}
+                    className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
                 {isAdmin && isEditing && (
                   <div className="absolute right-2 top-2 flex flex-col gap-1">
                     {index > 0 && (

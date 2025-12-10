@@ -19,6 +19,7 @@ export type Database = {
           brand: string
           category: string
           created_at: string | null
+          display_order: number | null
           id: string
           images: string[]
           name: string
@@ -31,6 +32,7 @@ export type Database = {
           brand?: string
           category: string
           created_at?: string | null
+          display_order?: number | null
           id?: string
           images?: string[]
           name: string
@@ -43,6 +45,7 @@ export type Database = {
           brand?: string
           category?: string
           created_at?: string | null
+          display_order?: number | null
           id?: string
           images?: string[]
           name?: string

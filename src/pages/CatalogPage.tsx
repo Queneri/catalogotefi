@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ProductCard, Product } from "@/components/ProductCard";
+import { ProductCard, Product, SortableProductCard } from "@/components/ProductCard";
 import { CatalogHeader } from "@/components/CatalogHeader";
 import { BulkPriceDialog } from "@/components/BulkPriceDialog";
 import { exportToPDF } from "@/utils/pdfExport";
@@ -12,6 +12,21 @@ import { Plus, X, ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { z } from "zod";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
 import {
   Dialog,
   DialogContent,
@@ -112,13 +127,24 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
     checkAdminStatus();
   }, [user]);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const loadProducts = async () => {
     try {
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('brand', brand)
-        .order('created_at', { ascending: false });
+        .order('display_order', { ascending: true });
 
       if (error) throw error;
 
@@ -138,6 +164,37 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
       toast.error('Error al cargar los productos');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = products.findIndex((p) => String(p.id) === active.id);
+      const newIndex = products.findIndex((p) => String(p.id) === over.id);
+
+      const newProducts = arrayMove(products, oldIndex, newIndex);
+      setProducts(newProducts);
+
+      // Update display_order in database
+      try {
+        const updates = newProducts.map((product, index) => ({
+          id: String(product.id),
+          display_order: index,
+        }));
+
+        for (const update of updates) {
+          await supabase
+            .from('products')
+            .update({ display_order: update.display_order })
+            .eq('id', update.id);
+        }
+      } catch (error) {
+        console.error('Error updating order:', error);
+        toast.error('Error al guardar el orden');
+        loadProducts(); // Reload on error
+      }
     }
   };
 
@@ -583,33 +640,59 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
           </div>
         )}
 
-        <div className="product-grid-container grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {isLoading ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-12 gap-4">
-              <Loader2 className="h-10 w-10 text-primary animate-spin" />
-              <p className="text-muted-foreground">Cargando productos...</p>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={products.map((p) => String(p.id))}
+            strategy={rectSortingStrategy}
+          >
+            <div className="product-grid-container grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {isLoading ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-12 gap-4">
+                  <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                  <p className="text-muted-foreground">Cargando productos...</p>
+                </div>
+              ) : products.length === 0 ? (
+                <div className="col-span-full flex justify-center py-12">
+                  <p className="text-muted-foreground">No hay productos. Agrega tu primer producto!</p>
+                </div>
+              ) : (
+                products.map((product) => (
+                  isAdmin ? (
+                    <SortableProductCard
+                      key={product.id}
+                      product={product}
+                      isAdmin={isAdmin}
+                      brand={brand}
+                      onPriceUpdate={handlePriceUpdate}
+                      onSizesUpdate={handleSizesUpdate}
+                      onImagesUpdate={handleImagesUpdate}
+                      onNameUpdate={handleNameUpdate}
+                      onDelete={handleDeleteProduct}
+                      onSeñaUpdate={handleSeñaUpdate}
+                    />
+                  ) : (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      isAdmin={isAdmin}
+                      brand={brand}
+                      onPriceUpdate={handlePriceUpdate}
+                      onSizesUpdate={handleSizesUpdate}
+                      onImagesUpdate={handleImagesUpdate}
+                      onNameUpdate={handleNameUpdate}
+                      onDelete={handleDeleteProduct}
+                      onSeñaUpdate={handleSeñaUpdate}
+                    />
+                  )
+                ))
+              )}
             </div>
-          ) : products.length === 0 ? (
-            <div className="col-span-full flex justify-center py-12">
-              <p className="text-muted-foreground">No hay productos. Agrega tu primer producto!</p>
-            </div>
-          ) : (
-            products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                isAdmin={isAdmin}
-                brand={brand}
-                onPriceUpdate={handlePriceUpdate}
-                onSizesUpdate={handleSizesUpdate}
-                onImagesUpdate={handleImagesUpdate}
-                onNameUpdate={handleNameUpdate}
-                onDelete={handleDeleteProduct}
-                onSeñaUpdate={handleSeñaUpdate}
-              />
-            ))
-          )}
-        </div>
+          </SortableContext>
+        </DndContext>
       </main>
 
       <footer className="border-t border-border bg-background py-8">
