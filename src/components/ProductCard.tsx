@@ -51,6 +51,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 interface ProductCardProps {
   product: Product;
   isAdmin: boolean;
+  brand?: "anine-bing" | "golden-goose";
   onPriceUpdate: (id: number | string, newPrice: number) => void;
   onSizesUpdate: (id: number | string, newSizes: string[]) => void;
   onImagesUpdate: (id: number | string, newImages: string[]) => void;
@@ -62,6 +63,7 @@ interface ProductCardProps {
 export const ProductCard = ({ 
   product,
   isAdmin,
+  brand,
   onPriceUpdate, 
   onSizesUpdate, 
   onImagesUpdate,
@@ -338,17 +340,19 @@ export const ProductCard = ({
                   step="0.01"
                 />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground w-12">Seña:</span>
-                <Input
-                  type="number"
-                  value={editedSeña}
-                  onChange={(e) => setEditedSeña(e.target.value)}
-                  className="h-8 flex-1 text-sm"
-                  step="0.01"
-                  placeholder="0.00"
-                />
-              </div>
+              {brand !== "golden-goose" && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground w-12">Seña:</span>
+                  <Input
+                    type="number"
+                    value={editedSeña}
+                    onChange={(e) => setEditedSeña(e.target.value)}
+                    className="h-8 flex-1 text-sm"
+                    step="0.01"
+                    placeholder="0.00"
+                  />
+                </div>
+              )}
               <div className="flex gap-2 justify-end">
                 <Button
                   size="sm"
@@ -377,7 +381,7 @@ export const ProductCard = ({
                       ${product.price.toFixed(2)}
                     </span>
                   </div>
-                  {product.seña !== undefined && product.seña > 0 && (
+                  {brand !== "golden-goose" && product.seña !== undefined && product.seña > 0 && (
                     <div className="text-xs text-muted-foreground">
                       Seña: ${product.seña.toFixed(2)}
                     </div>

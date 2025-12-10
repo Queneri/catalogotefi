@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { ProductCard, Product } from "@/components/ProductCard";
 import { CatalogHeader } from "@/components/CatalogHeader";
 import { BulkPriceDialog } from "@/components/BulkPriceDialog";
@@ -411,6 +412,38 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
           </Button>
         </div>
 
+        {brand === "golden-goose" && (
+          <motion.section 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="mb-8"
+          >
+            <div className="max-w-2xl mx-auto">
+              <div className="relative overflow-hidden rounded-lg border border-foreground/10 bg-gradient-to-br from-card via-card to-muted/30 p-6 md:p-8">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
+                <div className="absolute -top-12 -right-12 w-24 h-24 bg-foreground/5 rounded-full blur-2xl" />
+                <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-foreground/5 rounded-full blur-xl" />
+                
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center">
+                      <span className="text-sm">💵</span>
+                    </div>
+                    <h3 className="text-sm font-medium uppercase tracking-[0.2em] text-foreground/80">
+                      Información de precios
+                    </h3>
+                  </div>
+                  
+                  <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
+                    <span className="text-foreground font-medium">El precio es en USD</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+        )}
+
         {isAdmin && (
           <div className="mb-8 flex flex-wrap gap-3 justify-end">
             <BulkPriceDialog 
@@ -495,19 +528,21 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
                       placeholder="0.00"
                     />
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="seña">Seña (50% automático, editable)</Label>
-                    <Input
-                      id="seña"
-                      type="number"
-                      step="0.01"
-                      value={newProduct.seña}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, seña: e.target.value })
-                      }
-                      placeholder="0.00"
-                    />
-                  </div>
+                  {brand !== "golden-goose" && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="seña">Seña (50% automático, editable)</Label>
+                      <Input
+                        id="seña"
+                        type="number"
+                        step="0.01"
+                        value={newProduct.seña}
+                        onChange={(e) =>
+                          setNewProduct({ ...newProduct, seña: e.target.value })
+                        }
+                        placeholder="0.00"
+                      />
+                    </div>
+                  )}
                   <div className="grid gap-2">
                     <Label htmlFor="image">Imágenes del producto</Label>
                     <Input
@@ -564,6 +599,7 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
                 key={product.id}
                 product={product}
                 isAdmin={isAdmin}
+                brand={brand}
                 onPriceUpdate={handlePriceUpdate}
                 onSizesUpdate={handleSizesUpdate}
                 onImagesUpdate={handleImagesUpdate}
