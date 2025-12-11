@@ -226,7 +226,7 @@ export const ProductCard = ({
         </>
       )}
       
-      <div className="relative aspect-square overflow-hidden bg-muted">
+      <div className={`relative aspect-square overflow-hidden ${brand === "golden-goose" ? "bg-white" : "bg-muted"}`}>
         <Carousel className="h-full w-full">
           <CarouselContent className="h-full">
             {product.images.map((image, index) => (
