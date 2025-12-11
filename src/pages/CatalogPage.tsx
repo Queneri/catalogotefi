@@ -492,10 +492,14 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
                     </h3>
                   </div>
                   
-                  <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-                    <span className="text-foreground font-medium">El precio es en USD;</span>
-                    <span className="text-foreground font-medium"> se cotiza en pesos al blue del día;</span>
-                    <span className="text-foreground font-medium"> El pago es total</span>
+                  <div className="text-muted-foreground leading-relaxed text-sm md:text-base space-y-1">
+                    <p className="text-foreground font-medium">El precio es en USD.</p>
+                    <p className="text-foreground font-medium">Se cotiza en pesos al blue del día.</p>
+                    <p className="text-foreground font-medium">El pago es total.</p>
+                  </div>
+                  
+                  <p className="text-muted-foreground text-xs md:text-sm mt-4 italic">
+                    *Consultar por más modelos, disponibilidad y tiempo de entrega.
                   </p>
                 </div>
               </div>
