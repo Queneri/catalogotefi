@@ -482,8 +482,8 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
                 <div className="absolute -top-12 -right-12 w-24 h-24 bg-foreground/5 rounded-full blur-2xl" />
                 <div className="absolute -bottom-8 -left-8 w-20 h-20 bg-foreground/5 rounded-full blur-xl" />
                 
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-4">
+                <div className="relative z-10 text-center">
+                  <div className="flex items-center justify-center gap-3 mb-4">
                     <div className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center">
                       <span className="text-sm">💵</span>
                     </div>
@@ -493,7 +493,9 @@ const CatalogPage = ({ brand }: CatalogPageProps) => {
                   </div>
                   
                   <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-                    <span className="text-foreground font-medium">El precio es en USD</span>
+                    <span className="text-foreground font-medium">El precio es en USD;</span>
+                    <span className="text-foreground font-medium"> se cotiza en pesos al blue del día;</span>
+                    <span className="text-foreground font-medium"> El pago es total</span>
                   </p>
                 </div>
               </div>
