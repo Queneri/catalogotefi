@@ -231,13 +231,11 @@ export const ProductCard = ({
           <CarouselContent className="h-full">
             {product.images.map((image, index) => (
               <CarouselItem key={index} className="relative h-full">
-                <div className="flex h-full w-full items-center justify-center bg-muted">
-                  <img
-                    src={image}
-                    alt={`${product.name} - ${index + 1}`}
-                    className="max-h-full max-w-full object-contain transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
+                <img
+                  src={image}
+                  alt={`${product.name} - ${index + 1}`}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
                 {isAdmin && isEditing && (
                   <div className="absolute right-2 top-2 flex flex-col gap-1">
                     {index > 0 && (
