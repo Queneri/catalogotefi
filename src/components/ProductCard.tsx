@@ -234,7 +234,11 @@ export const ProductCard = ({
                 <img
                   src={image}
                   alt={`${product.name} - ${index + 1}`}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className={`h-full w-full transition-transform duration-500 group-hover:scale-105 ${
+                    brand === "golden-goose" 
+                      ? "object-contain object-center" 
+                      : "object-cover"
+                  }`}
                 />
                 {isAdmin && isEditing && (
                   <div className="absolute right-2 top-2 flex flex-col gap-1">
